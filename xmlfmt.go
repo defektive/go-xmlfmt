@@ -47,9 +47,7 @@ func replaceTag(prefix, indent string) func(string) string {
 			indentLevel--
 			return m + NL + prefix + strings.Repeat(indent, indentLevel)
 		}
-		defer func() {
-			indentLevel++
-		}()
+		indentLevel++
 
 		return NL + prefix + strings.Repeat(indent, indentLevel) + m
 	}
