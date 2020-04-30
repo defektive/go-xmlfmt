@@ -32,15 +32,15 @@ func replaceTag(prefix, indent string) func(string) string {
 	return func(m string) string {
 		// head elem
 		if strings.HasPrefix(m, "<?xml") {
-			return NL + prefix + strings.Repeat(indent, indentLevel) + m
+			return prefix + strings.Repeat(indent, indentLevel) + m + NL
 		}
 		// empty elem
 		if strings.HasSuffix(m, "/>") {
-			return NL + prefix + strings.Repeat(indent, indentLevel) + m
+			return prefix + strings.Repeat(indent, indentLevel) + m + NL
 		}
 		// comment elem
 		if strings.HasPrefix(m, "<!") {
-			return NL + prefix + strings.Repeat(indent, indentLevel) + m
+			return NL + prefix + strings.Repeat(indent, indentLevel) + m 
 		}
 		// end elem
 		if strings.HasPrefix(m, "</") {
@@ -48,7 +48,7 @@ func replaceTag(prefix, indent string) func(string) string {
 			defer func() {
 				indentLevel--
 			}()
-			return m + NL + prefix + strings.Repeat(indent, indentLevel)
+			return m + NL
 		}
 // 		defer func() {
 			indentLevel++
