@@ -21,9 +21,12 @@ var (
 func FormatXML(xmls, prefix, indent string) string {
 	// replace all whitespace between tags
 	src := regexp.MustCompile(`(?s)>\s+<`).ReplaceAllString(xmls, "><")
+	src = regexp.MustCompile(`\n\s+<`).ReplaceAllString(xmls, "<")
 
 	rf := replaceTag(prefix, indent)
-	return (prefix + reg.ReplaceAllStringFunc(src, rf))
+	formatted := (prefix + reg.ReplaceAllStringFunc(src, rf))
+	formatted = regexp.MustCompile(`\n\s+\n`).ReplaceAllString(formatted, "\n")
+	return regexp.MustCompile(`\n+`).ReplaceAllString(formatted, "\n")
 }
 
 // replaceTag returns a closure function to do 's/(?<=>)\s+(?=<)//g; s(<(/?)([^>]+?)(/?)>)($indent+=$3?0:$1?-1:1;"<$1$2$3>"."\n".("  "x$indent))ge' as in Perl
@@ -42,10 +45,11 @@ func replaceTag(prefix, indent string) func(string) string {
 		if strings.HasSuffix(m, "/>") {
 			if justOpened {
 				justOpened = false
-				return NL + prefix + strings.Repeat(indent, indentLevel) + m + NL
-			} else {
-				return prefix + strings.Repeat(indent, indentLevel) + m + NL
 			}
+			return NL + prefix + strings.Repeat(indent, indentLevel) + m + NL
+			// } else {
+			// 	return prefix + strings.Repeat(indent, indentLevel) + m + NL
+			// }
 		}
 		// comment elem
 		if strings.HasPrefix(m, "<!") {
@@ -61,19 +65,19 @@ func replaceTag(prefix, indent string) func(string) string {
 			if justOpened {
 				return m + NL
 			}
-			return prefix + strings.Repeat(indent, indentLevel) + m + NL
+			return NL + prefix + strings.Repeat(indent, indentLevel) + m + NL
 		}
 
 		defer func() {
 			indentLevel++
 		}()
 
-		if justOpened {
+		// if justOpened {
 			// indentLevel++
+			justOpened = true
 			return NL + prefix + strings.Repeat(indent, indentLevel) + m
-		}
+		// }
 
-		justOpened = true
 		return prefix + strings.Repeat(indent, indentLevel) + m
 	}
 }
